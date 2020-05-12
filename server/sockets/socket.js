@@ -7,19 +7,20 @@ const usuarios = new Usuarios();
 
 io.on('connection', (client) => {
     client.on('entrarChat', (usuario, callback) => {
-        if (!usuario.nombre) {
+        if (!usuario.nombre || !usuario.sala) {
             return {
                 error: true,
-                mensaje: 'Nombre requerido'
+                mensaje: 'Nombre y sala requeridos'
             };
         }
-        let personas = usuarios.agregarPersona(client.id, usuario.nombre);
-        client.broadcast.emit('listaPersonas', usuarios.getPersonas());
+        client.join(usuario.sala);
+        let personas = usuarios.agregarPersona(client.id, usuario.nombre, usuario.sala);
+        client.broadcast.to(usuario.sala).emit('listaPersonas', usuarios.getPersonasPorSala(usuario.sala));
         callback(personas);
     });
     client.on('crearMensaje', (data) => {
         let persona = usuarios.getPersona(client.id);
-        client.broadcast.emit('crearMensaje', crearMensaje(persona.nombre, data.mensaje));
+        client.broadcast.to(persona.sala).emit('crearMensaje', crearMensaje(persona.nombre, data.mensaje));
     });
     client.on('mensajePrivado', (data) => {
         let persona = usuarios.getPersona(client.id);
@@ -27,7 +28,7 @@ io.on('connection', (client) => {
     });
     client.on('disconnect', () => {
         let personaDesconectada = usuarios.borrarPersona(client.id);
-        client.broadcast.emit('crearMensaje', crearMensaje('Administrador', `${personaDesconectada.nombre} se ha desconectado.`));
-        client.broadcast.emit('listaPersonas', usuarios.getPersonas());
+        client.broadcast.to(personaDesconectada.sala).emit('crearMensaje', crearMensaje('Administrador', `${personaDesconectada.nombre} se ha desconectado.`));
+        client.broadcast.to(personaDesconectada.sala).emit('listaPersonas', usuarios.getPersonasPorSala(personaDesconectada.sala));
     });
 });

@@ -2,9 +2,9 @@ class Usuarios {
     constructor() {
         this.personas = [];
     }
-    agregarPersona(id, nombre) {
-        this.personas.push({ id, nombre });
-        return this.personas;
+    agregarPersona(id, nombre, sala) {
+        this.personas.push({ id, nombre, sala });
+        return this.getPersonasPorSala(sala);
     }
     getPersona(id) {
         let persona = this.personas.find(elem => elem.id === id);
@@ -12,6 +12,9 @@ class Usuarios {
     }
     getPersonas() {
         return this.personas;
+    }
+    getPersonasPorSala(sala) {
+        return this.personas.filter(elem => elem.sala === sala);
     }
     borrarPersona(id) {
         let personaBorrada = this.getPersona(id);
