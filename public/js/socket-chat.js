@@ -24,7 +24,9 @@ socket.on('disconnect', function() {
     console.log('Perdimos la conexión con el servidor')
 });
 socket.on('crearMensaje', function(resp) {
-    console.log('Servidor:', resp);
+    // console.log('Servidor:', resp);
+    renderizarMensajes(resp, false);
+    scrollBottom();
 });
 socket.on('listaPersonas', function(resp) {
     // console.log('Usuarios conectados', resp);
@@ -32,4 +34,7 @@ socket.on('listaPersonas', function(resp) {
 });
 socket.on('mensajePrivado', function(resp) {
     console.log('Mensaje Privado', resp);
+});
+socket.on('alerta', function(resp) {
+    renderizarAlerta(resp);
 });

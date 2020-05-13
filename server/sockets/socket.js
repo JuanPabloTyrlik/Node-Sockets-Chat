@@ -15,12 +15,14 @@ io.on('connection', (client) => {
         }
         client.join(usuario.sala);
         let personas = usuarios.agregarPersona(client.id, usuario.nombre, usuario.sala);
+        client.broadcast.to(usuario.sala).emit('alerta', crearMensaje('Administrador', `${usuario.nombre} se ha conectado.`));
         client.broadcast.to(usuario.sala).emit('listaPersonas', usuarios.getPersonasPorSala(usuario.sala));
         callback(personas);
     });
-    client.on('crearMensaje', (data) => {
+    client.on('crearMensaje', (data, callback) => {
         let persona = usuarios.getPersona(client.id);
         client.broadcast.to(persona.sala).emit('crearMensaje', crearMensaje(persona.nombre, data.mensaje));
+        callback(crearMensaje(persona.nombre, data.mensaje));
     });
     client.on('mensajePrivado', (data) => {
         let persona = usuarios.getPersona(client.id);
@@ -28,7 +30,7 @@ io.on('connection', (client) => {
     });
     client.on('disconnect', () => {
         let personaDesconectada = usuarios.borrarPersona(client.id);
-        client.broadcast.to(personaDesconectada.sala).emit('crearMensaje', crearMensaje('Administrador', `${personaDesconectada.nombre} se ha desconectado.`));
+        client.broadcast.to(personaDesconectada.sala).emit('alerta', crearMensaje('Administrador', `${personaDesconectada.nombre} se ha desconectado.`));
         client.broadcast.to(personaDesconectada.sala).emit('listaPersonas', usuarios.getPersonasPorSala(personaDesconectada.sala));
     });
 });
